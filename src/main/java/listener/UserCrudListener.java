@@ -10,23 +10,23 @@ public class UserCrudListener implements PostInsertEventListener, PostUpdateEven
      @Override
      public void onPostDelete(PostDeleteEvent postDeleteEvent) {
           Object entity = postDeleteEvent.getEntity();
-          log.info("Deleted entity: {}", entity);
+          log.info("EventListener. Deleted entity: {}", entity);
      }
 
      @Override
      public void onPostInsert(PostInsertEvent postInsertEvent) {
-          log.info("Inserted entity: {}", postInsertEvent.getEntity());
+          log.info("EventListener. Inserted entity: {}", postInsertEvent.getEntity());
      }
 
      @Override
      public void onPostLoad(PostLoadEvent postLoadEvent) {
-          log.info("Loaded entity: {}", postLoadEvent.getEntity());
+          log.info("EventListener. Loaded entity: {}", postLoadEvent.getEntity());
      }
 
      @Override
      public void onPostUpdate(PostUpdateEvent postUpdateEvent) {
           Object newEntity = postUpdateEvent.getEntity();
-          log.info("Updated  entity: {}", newEntity);
+          log.info("EventListener. Updated  entity: {}", newEntity);
      }
 
      @Override

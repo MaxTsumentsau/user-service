@@ -1,21 +1,18 @@
 package service;
 
-import dto.CreateUserResult;
-import dto.DeleteUserStatus;
-import dto.GetUserResult;
-import dto.UpdateUserResult;
+import dto.Result;
 import entity.User;
 
 import java.util.List;
 
 public interface UserService {
-     CreateUserResult createUser(String name, String email, Integer age);
+     Result<User> createUser(String name, String email, Integer age);
 
-     GetUserResult getUser(Long id);
+     Result<User> getUser(Integer id);
 
      List<User> getAllUsers();
 
-     UpdateUserResult updateUser(Long id, String name, String email, Integer age);
+     Result<User> updateUser(Integer id, String name, String email, Integer age);
 
-     DeleteUserStatus deleteUser(Long id);
+     Result<Void> deleteUser(Integer id);
 }

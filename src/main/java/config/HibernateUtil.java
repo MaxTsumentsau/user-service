@@ -2,6 +2,7 @@ package config;
 
 import entity.User;
 import listener.UserCrudListener;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -14,7 +15,7 @@ import org.hibernate.event.spi.EventType;
 import javax.sql.DataSource;
 import java.util.Properties;
 
-
+@Slf4j
 public class HibernateUtil {
 
      public static SessionFactory buildSessionFactory(Properties properties, DataSource dataSource) {
