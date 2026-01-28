@@ -19,7 +19,7 @@ public class UserDaoImpl implements UserDao {
 
      @Override
      public Optional<User> findById(Integer id) {
-          log.info("Called UserDaoImpl.findById with parameter {}", id );
+          log.info("Called UserDaoImpl.findById with parameter {}", id);
           Session session = SessionContext.get();
           return Optional.ofNullable(session.get(User.class, id));
      }

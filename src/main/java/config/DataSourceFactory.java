@@ -9,11 +9,11 @@ import javax.sql.DataSource;
 
 @Slf4j
 public class DataSourceFactory {
-     public final static int MAXIMUM_POOL_SIZE=10;
-     public final static int MINIMUM_IDLE=2;
-     public final static long IDLE_TIMEOUT=60000;
-     public final static long MAX_LIFETIME=1800000;
-     public final static long CONNECTION_TIMEOUT=30000;
+     public final static int MAXIMUM_POOL_SIZE = 10;
+     public final static int MINIMUM_IDLE = 2;
+     public final static long IDLE_TIMEOUT = 60000;
+     public final static long MAX_LIFETIME = 1800000;
+     public final static long CONNECTION_TIMEOUT = 30000;
 
      public static DataSource create(Dotenv env) {
           log.debug("Configuring HikariCP connection pool...");
@@ -30,14 +30,14 @@ public class DataSourceFactory {
           config.setConnectionTimeout(CONNECTION_TIMEOUT);
 
           log.debug("""
-HikariCP configured:
-  jdbcUrl={}
-  maxPoolSize={}
-  minIdle={}
-  idleTimeoutMs={}
-  maxLifetimeMs={}
-  connectionTimeoutMs={}
-""",
+                          HikariCP configured:
+                            jdbcUrl={}
+                            maxPoolSize={}
+                            minIdle={}
+                            idleTimeoutMs={}
+                            maxLifetimeMs={}
+                            connectionTimeoutMs={}
+                          """,
                   env.get("DB_URL"),
                   config.getMaximumPoolSize(),
                   config.getMinimumIdle(),

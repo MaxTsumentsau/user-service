@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface HandmadeTransactional {
      Isolation isolation() default Isolation.DEFAULT;
+
      boolean readOnly() default false;
 }
 

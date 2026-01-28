@@ -15,7 +15,8 @@ public class ConsoleRenderer {
                     System.out.println("Успех: " + result.data());
                }
                case NOT_FOUND, VALIDATION_ERROR, FAILURE -> {
-                    log.warn("Rendering ERROR result to console: status={}, message={}", result.status(), result.message());
+                    log.warn("Rendering ERROR result to console: status={}, message={}",
+                            result.status(), result.message());
                     System.out.println("Ошибка: " + result.message());
                }
           }

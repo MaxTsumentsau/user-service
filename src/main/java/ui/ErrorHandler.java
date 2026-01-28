@@ -1,7 +1,6 @@
 package ui;
 
 import lombok.extern.slf4j.Slf4j;
-
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.SQLGrammarException;
@@ -14,7 +13,7 @@ public class ErrorHandler {
           Throwable cause = unwrap(e);
 
           log.error("Unhandled exception in UI layer: {} ({})",
-                  cause.getMessage(), cause.getClass().getSimpleName(), cause );
+                  cause.getMessage(), cause.getClass().getSimpleName(), cause);
 
           switch (cause) {
                case ConstraintViolationException cve -> {
