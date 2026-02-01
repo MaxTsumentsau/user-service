@@ -1,10 +1,12 @@
 package ui;
 
+import dto.Status;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import service.UserService;
 
 import java.util.Scanner;
+import java.util.UUID;
 
 @Slf4j
 @AllArgsConstructor
@@ -14,9 +16,9 @@ public class ConsoleMenu {
      private final ErrorHandler errorHandler;
      private final ConsoleRenderer renderer;
      private final InputValidator validator;
+     private final Scanner scanner = new Scanner(System.in);
 
      public void start() {
-          Scanner scanner = new Scanner(System.in);
 
           while (true) {
                printMenu();
@@ -25,11 +27,12 @@ public class ConsoleMenu {
 
                try {
                     switch (choice) {
-                         case "1" -> createUser(scanner);
+                         case "1" -> createUser();
                          case "2" -> listUsers();
-                         case "3" -> getUser(scanner);
-                         case "4" -> updateUser(scanner);
-                         case "5" -> deleteUser(scanner);
+                         case "3" -> findUserByName();
+                         case "4" -> getUser();
+                         case "5" -> updateUser();
+                         case "6" -> deleteUser();
                          case "0" -> {
                               System.out.println("Выход...");
                               return;
@@ -49,14 +52,15 @@ public class ConsoleMenu {
                   === Меню ===
                   1. Создать пользователя
                   2. Показать всех пользователей
-                  3. Найти пользователя по ID
-                  4. Обновить пользователя
-                  5. Удалить пользователя
+                  3. Найти пользователя по имени
+                  4. Найти пользователя по ID
+                  5. Обновить пользователя
+                  6. Удалить пользователя
                   0. Выход
                   Выберите пункт:\s""");
      }
 
-     private void createUser(Scanner scanner) {
+     private void createUser() {
           System.out.print("Введите имя: ");
           String name = scanner.nextLine();
 
@@ -77,18 +81,20 @@ public class ConsoleMenu {
           renderer.renderList(result);
      }
 
-     private void getUser(Scanner scanner) {
+     private void getUser() {
           System.out.print("Введите ID: ");
-          Integer id = validator.readInt(scanner);
+          UUID id = validator.readUUID(scanner);
           log.info("Called ConsoleMenu.getUser() with parameter: id={}", id);
 
           var result = userService.getUser(id);
           renderer.render(result);
      }
 
-     private void updateUser(Scanner scanner) {
-          System.out.print("Введите ID: ");
-          Integer id = validator.readInt(scanner);
+     private void updateUser() {
+          UUID id = chooseUserByName();
+          if (id == null) {
+               return;
+          }
 
           System.out.print("Введите новое имя: ");
           String name = scanner.nextLine();
@@ -106,14 +112,47 @@ public class ConsoleMenu {
           renderer.render(result);
      }
 
-     private void deleteUser(Scanner scanner) {
-          System.out.print("Введите ID: ");
-          Integer id = validator.readInt(scanner);
+     private void deleteUser() {
+          UUID id = chooseUserByName();
 
           log.info("Called ConsoleMenu.deleteUser() with parameter id={}", id);
+          if (id == null) {
+               return;
+          }
 
           var result = userService.deleteUser(id);
           renderer.render(result);
+     }
+
+     private void findUserByName() {
+          UUID id = chooseUserByName();
+          log.info("Called ConsoleMenu.findUserByName() with parameter id={}", id);
+          if (id == null) {
+               return;
+          }
+
+          var result = userService.getUser(id);
+          renderer.render(result);
+     }
+
+     private UUID chooseUserByName() {
+          System.out.print("Введите имя или часть имени: ");
+          String name = scanner.nextLine().trim();
+
+          var result = userService.searchUsersByName(name);
+
+          if (result.status() != Status.SUCCESS) {
+               renderer.render(result);
+               return null;
+          }
+
+          var users = result.data();
+          renderer.renderIndexedUsers(users);
+
+          System.out.print("Выберите номер пользователя: ");
+          int index = validator.readIndex(scanner, users.size());
+
+          return users.get(index).getId();
      }
 }
 

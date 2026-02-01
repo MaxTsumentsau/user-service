@@ -6,7 +6,6 @@ import dao.UserDaoImpl;
 import dto.Result;
 import dto.Status;
 import entity.User;
-import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.UserService;
@@ -15,6 +14,7 @@ import service.UserServiceImpl;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,23 +49,23 @@ class UserServiceImplTest extends IntegrationTestBase {
 
      @Test
      void createUser_constraintViolation() {
-          Result<User> beforeCreate = service.getUser(1);
-          assertThrows(ConstraintViolationException.class, () ->
-                  service.createUser("Cackash Kavrott", beforeCreate.data().getEmail(), 23));
+          User beforeCreate = service.searchUsersByName("Harry").data().getFirst();
+          assertThrows(Exception.class, () ->
+                  service.createUser("Cackash Kavrott", beforeCreate.getEmail(), 23));
      }
 
      @Test
      void getUser_returnsSuccess() {
-          Result<User> result = service.getUser(9);
+          Result<List<User>> result = service.searchUsersByName("ncan");
           assertEquals(Status.SUCCESS, result.status());
-          assertEquals("Duncan Macleod", result.data().getName());
-          assertEquals("highlander@gmail.com", result.data().getEmail());
-          assertEquals(534, result.data().getAge());
+          assertEquals("Duncan Macleod", result.data().getFirst().getName());
+          assertEquals("highlander@gmail.com", result.data().getFirst().getEmail());
+          assertEquals(534, result.data().getFirst().getAge());
      }
 
      @Test
      void getUser_returnsNotFound() {
-          Result<User> result = service.getUser(333);
+          Result<User> result = service.getUser(UUID.fromString("a46b05bb-29ec-4dff-b430-7deb4e2a2ce1"));
           assertEquals(Status.NOT_FOUND, result.status());
      }
 
@@ -77,9 +77,10 @@ class UserServiceImplTest extends IntegrationTestBase {
 
      @Test
      void updateUser() {
-          User beforeUpdate = service.getUser(10).data();
-          Result<User> update = service.updateUser(10, "Eminem", "superman@gmail.com", 45);
-          User afterUpdate = service.getUser(10).data();
+          User beforeUpdate = service.searchUsersByName("kent").data().getFirst();
+          Result<User> update = service.updateUser(beforeUpdate.getId(),
+                  "Eminem", "superman@gmail.com", 45);
+          User afterUpdate = service.getUser(beforeUpdate.getId()).data();
 
           assertNotEquals(beforeUpdate.getName(), afterUpdate.getName());
           assertEquals(beforeUpdate.getEmail(), afterUpdate.getEmail());
@@ -89,9 +90,10 @@ class UserServiceImplTest extends IntegrationTestBase {
 
      @Test
      void updateUser_returnsNotFound() {
-          Result<User> beforeUpdate = service.getUser(17);
-          Result<User> update = service.updateUser(17, "Eminem", "superman@gmail.com", 45);
-          Result<User> afterUpdate = service.getUser(17);
+          Result<User> beforeUpdate = service.getUser(UUID.fromString("6487e179-3ed1-446c-8c44-bbb5ddc475da"));
+          Result<User> update = service.updateUser(UUID.fromString("6487e179-3ed1-446c-8c44-bbb5ddc475da"),
+                  "Eminem", "superman@gmail.com", 45);
+          Result<User> afterUpdate = service.getUser(UUID.fromString("6487e179-3ed1-446c-8c44-bbb5ddc475da"));
 
           assertEquals(Status.NOT_FOUND, afterUpdate.status());
           assertNull(beforeUpdate.data());
@@ -100,9 +102,9 @@ class UserServiceImplTest extends IntegrationTestBase {
 
      @Test
      void deleteUser() {
-          User beforeDelete = service.getUser(10).data();
-          Result<Void> result = service.deleteUser(10);
-          Result<User> afterDelete = service.getUser(10);
+          User beforeDelete = service.searchUsersByName("Potter").data().getFirst();
+          Result<Void> result = service.deleteUser(beforeDelete.getId());
+          Result<User> afterDelete = service.getUser(beforeDelete.getId());
 
           assertInstanceOf(User.class, beforeDelete);
           assertEquals(Status.SUCCESS, result.status());
@@ -111,12 +113,26 @@ class UserServiceImplTest extends IntegrationTestBase {
 
      @Test
      void deleteUser_returnsNotFound() {
-          Result<User> beforeDelete = service.getUser(12);
-          Result<Void> result = service.deleteUser(12);
-          Result<User> afterDelete = service.getUser(12);
+          Result<User> beforeDelete = service.getUser(UUID.fromString("6487e666-3ed1-446c-8c44-bbb5ddc475dd"));
+          Result<Void> result = service.deleteUser(UUID.fromString("6487e666-3ed1-446c-8c44-bbb5ddc475dd"));
+          Result<User> afterDelete = service.getUser(UUID.fromString("6487e666-3ed1-446c-8c44-bbb5ddc475dd"));
 
           assertEquals(Status.NOT_FOUND, beforeDelete.status());
           assertEquals(Status.NOT_FOUND, result.status());
           assertEquals(Status.NOT_FOUND, afterDelete.status());
+     }
+
+     @Test
+     void searchUsersByName() {
+          List<User> result = service.searchUsersByName("Potter").data();
+          assertEquals("Harry Potter", result.getFirst().getName());
+          assertEquals("witcher@gmail.com", result.getFirst().getEmail());
+          assertEquals(1, result.size());
+     }
+
+     @Test
+     void searchUsersByName_notFound() {
+          Result<List<User>> result = service.searchUsersByName("Java programmer");
+          assertEquals(Status.NOT_FOUND, result.status());
      }
 }

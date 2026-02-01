@@ -7,6 +7,7 @@ import org.hibernate.Session;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 public class UserDaoImpl implements UserDao {
@@ -18,7 +19,7 @@ public class UserDaoImpl implements UserDao {
      }
 
      @Override
-     public Optional<User> findById(Integer id) {
+     public Optional<User> findById(UUID id) {
           log.info("Called UserDaoImpl.findById with parameter {}", id);
           Session session = SessionContext.get();
           return Optional.ofNullable(session.get(User.class, id));
@@ -44,5 +45,16 @@ public class UserDaoImpl implements UserDao {
           Session session = SessionContext.get();
           session.remove(user);
      }
+
+     @Override
+     public List<User> findByNameLike(String pattern) {
+          log.info("Called UserDaoImpl.findByNameLike with parameter {}", pattern);
+          Session session = SessionContext.get();
+          return session.createQuery(
+                          "FROM User WHERE LOWER(name) LIKE LOWER(:pattern)", User.class)
+                  .setParameter("pattern", "%" + pattern + "%")
+                  .list();
+     }
+
 }
 

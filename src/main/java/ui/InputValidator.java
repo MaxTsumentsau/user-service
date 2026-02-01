@@ -1,6 +1,7 @@
 package ui;
 
 import java.util.Scanner;
+import java.util.UUID;
 
 public class InputValidator {
 
@@ -10,6 +11,31 @@ public class InputValidator {
                     return Integer.parseInt(scanner.nextLine());
                } catch (NumberFormatException e) {
                     System.out.print("Введите корректное число: ");
+               }
+          }
+     }
+
+     public int readIndex(Scanner scanner, int max) {
+          while (true) {
+               try {
+                    int value = Integer.parseInt(scanner.nextLine());
+                    if (value >= 1 && value <= max) {
+                         return value - 1;
+                    }
+                    System.out.printf("Введите число от 1 до %d: ", max);
+               } catch (NumberFormatException e) {
+                    System.out.print("Введите корректное число: ");
+               }
+          }
+     }
+
+
+     public UUID readUUID(Scanner scanner) {
+          while (true) {
+               try {
+                    return UUID.fromString(scanner.nextLine().trim());
+               } catch (IllegalArgumentException e) {
+                    System.out.print("Введите корректный ид: ");
                }
           }
      }

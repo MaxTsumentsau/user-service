@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -46,15 +47,16 @@ class UserServiceImplTest {
 
      @Test
      void getUser_returnsSuccess() {
-          when(dao.findById(1))
-                  .thenReturn(Optional.of(new User(1, "Max", "max@mail.com", 34,
+          when(dao.findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a")))
+                  .thenReturn(Optional.of(new User(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"),
+                          "Max", "max@mail.com", 34,
                           LocalDateTime.of(2026, 1, 28, 16, 13, 0))));
 
-          UserService service = new UserServiceImpl(dao);
+          //UserService service = new UserServiceImpl(dao);
 
-          Result<User> result = service.getUser(1);
+          Result<User> result = service.getUser(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
 
-          verify(dao).findById(1);
+          verify(dao).findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
           assertEquals(Status.SUCCESS, result.status());
           assertEquals("Max", result.data().getName());
           assertEquals("max@mail.com", result.data().getEmail());
@@ -65,21 +67,23 @@ class UserServiceImplTest {
 
      @Test
      void getUser_returnsNotFound() {
-          when(dao.findById(1))
+          when(dao.findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a")))
                   .thenReturn(Optional.empty());
 
-          Result<User> result = service.getUser(1);
+          Result<User> result = service.getUser(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
 
-          verify(dao).findById(1);
+          verify(dao).findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
           assertEquals(Status.NOT_FOUND, result.status());
      }
 
      @Test
      void getAllUsers() {
           when(dao.findAll()).thenReturn(List.of(
-                          new User(1, "Max", "max@mail.com", 34,
+                          new User(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"),
+                                  "Max", "max@mail.com", 34,
                                   LocalDateTime.of(2026, 1, 28, 16, 13, 0)),
-                          new User(1, "2ba", "2ba@mail.com", 34,
+                          new User(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393b"),
+                                  "2ba", "2ba@mail.com", 34,
                                   LocalDateTime.of(2026, 1, 28, 17, 13, 0))
                   )
           );
@@ -103,22 +107,27 @@ class UserServiceImplTest {
 
      @Test
      void updateUser() {
-          User user = new User(1, "Max", "max@mail.com", 34, LocalDateTime.now());
+          User user = new User(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"),
+                  "Max", "max@mail.com", 34, LocalDateTime.now());
 
-          when(dao.findById(1)).thenReturn(Optional.of(user));
+          when(dao.findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a")))
+                  .thenReturn(Optional.of(user));
           doNothing().when(dao).update(user);
 
-          Result<User> result = service.updateUser(1, "Maxim", "maxim@mail.com", 34);
+          Result<User> result = service.updateUser(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"),
+                  "Maxim", "maxim@mail.com", 34);
           verify(dao).update(user);
-          verify(dao).findById(1);
+          verify(dao).findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
           assertEquals(Status.SUCCESS, result.status());
      }
 
      @Test
      void updateUser_notFound() {
-          when(dao.findById(1)).thenReturn(Optional.empty());
+          when(dao.findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a")))
+                  .thenReturn(Optional.empty());
 
-          Result<User> result = service.updateUser(1, "Maxim", "maxim@mail.com", 34);
+          Result<User> result = service.updateUser(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"),
+                  "Maxim", "maxim@mail.com", 34);
 
           verify(dao, never()).update(any());
           assertEquals(Status.NOT_FOUND, result.status());
@@ -126,25 +135,60 @@ class UserServiceImplTest {
 
      @Test
      void deleteUser() {
-          User user = new User(1, "Max", "max@mail.com", 34, LocalDateTime.now());
+          User user = new User(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"),
+                  "Max", "max@mail.com", 34, LocalDateTime.now());
 
-          when(dao.findById(1)).thenReturn(Optional.of(user));
+          when(dao.findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a")))
+                  .thenReturn(Optional.of(user));
           doNothing().when(dao).delete(user);
 
-          Result<Void> result = service.deleteUser(1);
+          Result<Void> result = service.deleteUser(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
 
-          verify(dao).findById(1);
+          verify(dao).findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
           verify(dao).delete(user);
           assertEquals(Status.SUCCESS, result.status());
      }
 
      @Test
      void deleteUser_notFound() {
-          when(dao.findById(1)).thenReturn(Optional.empty());
+          when(dao.findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a")))
+                  .thenReturn(Optional.empty());
 
-          Result<Void> result = service.deleteUser(1);
+          Result<Void> result = service.deleteUser(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
 
           verify(dao, never()).delete(any());
+          assertEquals(Status.NOT_FOUND, result.status());
+     }
+
+     @Test
+     void searchUsersByName(){
+          when(dao.findByNameLike("max"))
+                  .thenReturn(List.of(new User(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"),
+                          "Max", "max@mail.com", 34,
+                          LocalDateTime.of(2026, 1, 28, 16, 13, 0))));
+
+          //UserService service = new UserServiceImpl(dao);
+
+          Result<List<User>> result = service.searchUsersByName("max");
+
+          verify(dao).findByNameLike("max");
+          assertEquals(Status.SUCCESS, result.status());
+          assertEquals("Max", result.data().getFirst().getName());
+          assertEquals("max@mail.com", result.data().getFirst().getEmail());
+          assertEquals(34, result.data().getFirst().getAge());
+          assertEquals(LocalDateTime.of(2026, 1, 28, 16, 13, 0),
+                  result.data().getFirst().getCreatedAt());
+          assertEquals(1, result.data().size());
+     }
+
+     @Test
+     void searchUsersByName_notFound(){
+          when(dao.findByNameLike("Tumensev"))
+                  .thenReturn(List.of());
+
+          Result<List<User>> result = service.searchUsersByName("Tumensev");
+
+          verify(dao).findByNameLike("Tumensev");
           assertEquals(Status.NOT_FOUND, result.status());
      }
 }

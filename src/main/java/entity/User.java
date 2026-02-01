@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -15,8 +16,8 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
      @Id
-     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Integer id;
+     @GeneratedValue
+     private UUID id;
 
      private String name;
 
