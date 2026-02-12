@@ -12,41 +12,41 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import javax.sql.DataSource;
 import java.util.Properties;
 
-abstract class IntegrationTestBase {
+public abstract class IntegrationTestBase {
 
-     protected static PostgreSQLContainer<?> postgres;
-     protected static SessionFactory sessionFactory;
+    protected static PostgreSQLContainer<?> postgres;
+    protected static SessionFactory sessionFactory;
 
-     @BeforeAll
-     static void init() {
-          postgres = new PostgreSQLContainer<>("postgres:18.1-alpine3.23")
-                  .withDatabaseName("testdb")
-                  .withUsername("test")
-                  .withPassword("test");
-          postgres.start();
+    @BeforeAll
+    static void init() {
+        postgres = new PostgreSQLContainer<>("postgres:18.1-alpine3.23")
+                .withDatabaseName("testdb")
+                .withUsername("test")
+                .withPassword("test");
+        postgres.start();
 
-          HikariConfig cfg = new HikariConfig();
-          cfg.setJdbcUrl(postgres.getJdbcUrl());
-          cfg.setUsername(postgres.getUsername());
-          cfg.setPassword(postgres.getPassword());
-          DataSource ds = new HikariDataSource(cfg);
+        HikariConfig cfg = new HikariConfig();
+        cfg.setJdbcUrl(postgres.getJdbcUrl());
+        cfg.setUsername(postgres.getUsername());
+        cfg.setPassword(postgres.getPassword());
+        DataSource ds = new HikariDataSource(cfg);
 
-          Flyway.configure()
-                  .dataSource(ds)
-                  .locations("classpath:db/migration")
-                  .load()
-                  .migrate();
+        Flyway.configure()
+                .dataSource(ds)
+                .locations("classpath:db/migration")
+                .load()
+                .migrate();
 
-          Properties props = new Properties();
-          props.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-          props.setProperty("hibernate.hbm2ddl.auto", "validate");
+        Properties props = new Properties();
+        props.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+        props.setProperty("hibernate.hbm2ddl.auto", "validate");
 
-          sessionFactory = HibernateUtil.buildSessionFactory(props, ds);
-     }
+        sessionFactory = HibernateUtil.buildSessionFactory(props, ds);
+    }
 
-     @AfterAll
-     static void shutdown() {
-          postgres.stop();
-     }
+    @AfterAll
+    static void shutdown() {
+        postgres.stop();
+    }
 }
 

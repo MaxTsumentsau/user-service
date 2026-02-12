@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @AllArgsConstructor
@@ -34,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
      @Override
      @HandmadeTransactional(readOnly = true)
-     public Result<User> getUser(Integer id) {
+     public Result<User> getUser(UUID id) {
           return userDao.findById(id)
                   .map(Result::success)
                   .orElse(Result.notFound("Пользователь не найден"));
@@ -48,7 +49,7 @@ public class UserServiceImpl implements UserService {
 
      @Override
      @HandmadeTransactional
-     public Result<User> updateUser(Integer id, String name, String email, Integer age) {
+     public Result<User> updateUser(UUID id, String name, String email, Integer age) {
           User user = userDao.findById(id).orElse(null);
           if (user == null) {
                return Result.notFound("Пользователь не найден");
@@ -62,15 +63,24 @@ public class UserServiceImpl implements UserService {
           return Result.success(user);
      }
 
-
      @Override
      @HandmadeTransactional
-     public Result<Void> deleteUser(Integer id) {
+     public Result<Void> deleteUser(UUID id) {
           User user = userDao.findById(id).orElse(null);
           if (user == null) {
                return Result.notFound("Пользователь не найден");
           } userDao.delete(user);
           return Result.success(null);
+     }
+
+     @Override
+     @HandmadeTransactional(readOnly = true)
+     public Result<List<User>> searchUsersByName(String name) {
+          var users = userDao.findByNameLike(name);
+          if (users.isEmpty()) {
+               return Result.notFound("Пользователи не найдены");
+          }
+          return Result.success(users);
      }
 }
 
