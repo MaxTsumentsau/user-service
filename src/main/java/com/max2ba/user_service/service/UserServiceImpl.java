@@ -25,6 +25,8 @@ import static org.springframework.transaction.annotation.Isolation.READ_COMMITTE
 @Service
 @Transactional(isolation = READ_COMMITTED)
 public class UserServiceImpl implements UserService {
+     private static final String EMAIL_VALIDATION_ERROR = "Email уже существует";
+     private static final String USER_NOT_FOUND = "Нарушение ограничений БД. ";
 
      private final UserMapper userMapper;
      private final UserRepository userRepository;
@@ -37,7 +39,7 @@ public class UserServiceImpl implements UserService {
           try {
                return userRepository.save(user);
           } catch (DataIntegrityViolationException e) {
-               throw new ValidationException("Email уже существует");
+               throw new ValidationException(EMAIL_VALIDATION_ERROR);
           }
      }
 
@@ -46,7 +48,7 @@ public class UserServiceImpl implements UserService {
      @Transactional(readOnly = true)
      public User getUser(UUID id) {
           return userRepository.findById(id)
-                  .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+                  .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
      }
 
      @Loggable
@@ -60,7 +62,7 @@ public class UserServiceImpl implements UserService {
      @Override
      public User updateUser(UUID id, UpdateUserRequest req) {
           User user = userRepository.findById(id)
-                  .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+                  .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
           userMapper.updateUserFromRequest(req, user);
 
@@ -71,7 +73,7 @@ public class UserServiceImpl implements UserService {
      @Override
      public void deleteUser(UUID id) {
           User user = userRepository.findById(id)
-                  .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+                  .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
           userRepository.delete(user);
      }

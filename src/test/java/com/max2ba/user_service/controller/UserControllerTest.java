@@ -45,7 +45,6 @@ class UserControllerTest {
      private UserController userController;
 
      private RestTestClient client;
-     private ObjectMapper objectMapper = new ObjectMapper();
 
      @BeforeEach
      void setUp() {
@@ -472,7 +471,7 @@ class UserControllerTest {
                   .expectBody()
                   .jsonPath("$.content").isEmpty()
                   .jsonPath("$.totalElements").isEqualTo(0)
-                  .returnResult();;
+                  .returnResult();
      }
 }
 

@@ -19,6 +19,11 @@ import java.util.Map;
 @Loggable
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+     private static final String DB_CONSTRAINT_ERROR = "Нарушение ограничений БД. ";
+     private static final String DATA_CONSTRAINT_ERROR = "Нарушение ограничений данных. ";
+     private static final String RESOURCE_NOT_FOUND = "Ресурс не найден: ";
+     private static final String INCORRECT_UUID_FORMAT = "Некорректный формат UUID";
+
 
      @ExceptionHandler(NotFoundException.class)
      public ResponseEntity<?> handleNotFound(NotFoundException ex) {
@@ -35,13 +40,13 @@ public class GlobalExceptionHandler {
      @ExceptionHandler(DataIntegrityViolationException.class)
      public ResponseEntity<?> handleDbErrors(DataIntegrityViolationException ex) {
           return ResponseEntity.badRequest()
-                  .body(Map.of("error", "Нарушение ограничений БД." + ex.getMessage()));
+                  .body(Map.of("error", DB_CONSTRAINT_ERROR + ex.getMessage()));
      }
 
      @ExceptionHandler(ConstraintViolationException.class)
      public ResponseEntity<?> handleHibernate(ConstraintViolationException ex) {
           return ResponseEntity.badRequest()
-                  .body(Map.of("error", "Нарушение ограничений данных. " + ex.getMessage()));
+                  .body(Map.of("error", DATA_CONSTRAINT_ERROR + ex.getMessage()));
      }
 
      @ExceptionHandler(NoResourceFoundException.class)
@@ -50,7 +55,7 @@ public class GlobalExceptionHandler {
                return ResponseEntity.notFound().build();
           }
           return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                  .body(Map.of("error", "Ресурс не найден: " + ex.getMessage()));
+                  .body(Map.of("error", RESOURCE_NOT_FOUND + ex.getMessage()));
      }
 
      @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -65,7 +70,7 @@ public class GlobalExceptionHandler {
      @ExceptionHandler(MethodArgumentTypeMismatchException.class)
      public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
           return ResponseEntity.badRequest()
-                  .body(Map.of("error", "Некорректный формат UUID"));
+                  .body(Map.of("error", INCORRECT_UUID_FORMAT));
      }
 
      @ExceptionHandler(IllegalArgumentException.class)
