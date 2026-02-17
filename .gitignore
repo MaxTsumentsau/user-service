@@ -37,3 +37,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/src/main/resources/application-secret.yml
+/src/main/resources/static/favicon.ico
