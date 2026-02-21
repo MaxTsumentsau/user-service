@@ -1,4 +1,8 @@
+server:
+  port: 8080
 spring:
+  application:
+    name: user-service
   web:
     resources:
       chain:
@@ -28,3 +32,10 @@ spring:
         format_sql: true
   config:
     import: optional:application-secret.yml
+  kafka:
+    bootstrap-servers: localhost:19092,localhost:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false

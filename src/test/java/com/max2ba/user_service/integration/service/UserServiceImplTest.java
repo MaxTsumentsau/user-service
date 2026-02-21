@@ -80,7 +80,7 @@ class UserServiceImplTest extends IntegrationTestBase {
 
      @Test
      void getAllUsers() {
-          var result = service.getAllUsers(PageRequest.of(0, 20));
+          var result = service.searchUsers(null, PageRequest.of(0, 20));
           assertEquals(10, result.getTotalElements());
      }
 
@@ -148,7 +148,7 @@ class UserServiceImplTest extends IntegrationTestBase {
      void searchUsersByName() {
           userRepository.save(new User(null, "Masha", "user1@gmail.com", 20, LocalDateTime.now()));
 
-          var result = service.searchUsersByName("Mash", PageRequest.of(0, 10));
+          var result = service.searchUsers("Mash", PageRequest.of(0, 10));
 
           assertThat(result.getContent().getFirst().getName()).isEqualTo("Masha");
           assertThat(result.getContent().getFirst().getEmail()).isEqualTo("user1@gmail.com");
@@ -157,7 +157,7 @@ class UserServiceImplTest extends IntegrationTestBase {
 
      @Test
      void searchUsersByName_notFound() {
-          var result = service.searchUsersByName("Java programmer", PageRequest.of(0, 10));
+          var result = service.searchUsers("Java programmer", PageRequest.of(0, 10));
           assertEquals(0, result.getTotalElements());
      }
 }

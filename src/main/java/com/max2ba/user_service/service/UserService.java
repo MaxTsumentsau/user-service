@@ -13,11 +13,9 @@ public interface UserService {
 
      User getUser(UUID id);
 
-     Page<User> getAllUsers(Pageable pageable);
-
      User updateUser(UUID id, UpdateUserRequest request);
 
-     void deleteUser(UUID id);
+     User deleteUser(UUID id);
 
-     Page<User> searchUsersByName(String name, Pageable pageable);
+     Page<User> searchUsers(String name, Pageable pageable);
 }
