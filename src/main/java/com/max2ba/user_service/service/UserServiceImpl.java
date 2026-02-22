@@ -105,7 +105,6 @@ public class UserServiceImpl implements UserService, UserFacade {
 
      @Override
      public ApiResponse<UserDto> deleteUserWithResponse(UUID id) {
-          deleteUser(id);
           return ApiResponse.success(userMapper.toDto(deleteUser(id)));
      }
 }

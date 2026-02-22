@@ -39,3 +39,7 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+      acks: all
+      retries: 2147483647
