@@ -1,7 +1,9 @@
 package com.max2ba.user_service.unit;
 
 import com.max2ba.user_service.dto.CreateUserRequest;
+import com.max2ba.user_service.dto.SendEmailRequest;
 import com.max2ba.user_service.dto.UpdateUserRequest;
+import com.max2ba.user_service.dto.UserOperation;
 import com.max2ba.user_service.entity.User;
 import com.max2ba.user_service.exception.NotFoundException;
 import com.max2ba.user_service.repository.UserRepository;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,23 +34,28 @@ class UserServiceImplTest {
      @Mock
      UserRepository userRepository;
      @Mock
-     private UserMapper userMapper;
+     UserMapper userMapper;
+     @Mock
+     ApplicationEventPublisher eventPublisher;
 
      @InjectMocks
      UserServiceImpl service;
 
      @Test
      void createUser() {
+          SendEmailRequest sendEmailRequests = new SendEmailRequest(UserOperation.CREATE, "max@gmail.com");
           when(userMapper.fromCreateRequest(any(CreateUserRequest.class)))
                   .thenReturn(new User(null, "Max", "max@gmail.com", 34, null));
 
           when(userRepository.save(any(User.class)))
                   .thenAnswer(invocation -> invocation.getArgument(0));
+          doNothing().when(eventPublisher).publishEvent(sendEmailRequests);
 
           var result = service.createUser(new CreateUserRequest("Max", "max@gmail.com", 34));
 
-          verify(userMapper).fromCreateRequest(any(CreateUserRequest.class));
+          verify(userMapper).fromCreateRequest(any());
           verify(userRepository).save(any(User.class));
+          verify(eventPublisher).publishEvent(any(SendEmailRequest.class));
 
           assertEquals("Max", result.getName());
           assertEquals("max@gmail.com", result.getEmail());
@@ -95,7 +103,7 @@ class UserServiceImplTest {
           when(userRepository.findAll(pageable))
                   .thenReturn(new PageImpl<>(users, pageable, users.size()));
 
-          var result = service.getAllUsers(pageable);
+          var result = service.searchUsers(null, pageable);
 
           assertEquals(2, result.getTotalElements());
           assertEquals("max@mail.com", result.getContent().get(0).getEmail());
@@ -107,7 +115,7 @@ class UserServiceImplTest {
           Pageable pageable = PageRequest.of(0, 10);
           when(userRepository.findAll(pageable)).thenReturn(Page.empty());
 
-          var resultList = service.getAllUsers(PageRequest.of(0, 10));
+          var resultList = service.searchUsers(null, PageRequest.of(0, 10));
 
           verify(userRepository).findAll(pageable);
           assertEquals(0, resultList.getTotalElements());
@@ -154,11 +162,13 @@ class UserServiceImplTest {
           when(userRepository.findById(user.getId()))
                   .thenReturn(Optional.of(user));
           doNothing().when(userRepository).delete(user);
+          doNothing().when(eventPublisher).publishEvent(any(SendEmailRequest.class));
 
           service.deleteUser(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
 
           verify(userRepository).findById(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"));
           verify(userRepository).delete(user);
+          verify(eventPublisher).publishEvent(any(SendEmailRequest.class));
           verifyNoMoreInteractions(userRepository);
      }
 
@@ -183,7 +193,7 @@ class UserServiceImplTest {
           when(userRepository.findByNameContainingIgnoreCase("max", pageable))
                   .thenReturn(new PageImpl<>(users, pageable, users.size()));
 
-          var result = service.searchUsersByName("max", pageable);
+          var result = service.searchUsers("max", pageable);
 
           verify(userRepository).findByNameContainingIgnoreCase("max", pageable);
           assertEquals("Max", result.getContent().getFirst().getName());
@@ -200,7 +210,7 @@ class UserServiceImplTest {
           when(userRepository.findByNameContainingIgnoreCase("Tumensev", pageable))
                   .thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
-          var result = service.searchUsersByName("Tumensev", pageable);
+          var result = service.searchUsers("Tumensev", pageable);
 
           verify(userRepository).findByNameContainingIgnoreCase("Tumensev", pageable);
           assertEquals(0, result.getTotalElements());

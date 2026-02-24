@@ -1,15 +1,14 @@
 package com.max2ba.user_service.service;
 
 import com.max2ba.user_service.annotation.Loggable;
-import com.max2ba.user_service.dto.CreateUserRequest;
-import com.max2ba.user_service.dto.UpdateUserRequest;
+import com.max2ba.user_service.dto.*;
 import com.max2ba.user_service.entity.User;
 import com.max2ba.user_service.exception.NotFoundException;
 import com.max2ba.user_service.exception.ValidationException;
 import com.max2ba.user_service.repository.UserRepository;
 import com.max2ba.user_service.util.UserMapper;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,30 +19,38 @@ import java.util.UUID;
 
 import static org.springframework.transaction.annotation.Isolation.READ_COMMITTED;
 
-@Slf4j
+
 @AllArgsConstructor
 @Service
+@Loggable
 @Transactional(isolation = READ_COMMITTED)
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserFacade {
      private static final String EMAIL_VALIDATION_ERROR = "Email уже существует";
      private static final String USER_NOT_FOUND = "Нарушение ограничений БД. ";
 
      private final UserMapper userMapper;
      private final UserRepository userRepository;
+     private final ApplicationEventPublisher applicationEventPublisher;
 
-     @Loggable
      @Override
      public User createUser(CreateUserRequest request) {
           User user = userMapper.fromCreateRequest(request);
 
           try {
-               return userRepository.save(user);
+               user = userRepository.save(user);
+               applicationEventPublisher.publishEvent(new SendEmailRequest(UserOperation.CREATE, user.getEmail()));
+               return user;
           } catch (DataIntegrityViolationException e) {
                throw new ValidationException(EMAIL_VALIDATION_ERROR);
           }
      }
 
-     @Loggable
+     @Override
+     public ApiResponse<UserDto> createUserWithResponse(CreateUserRequest request) {
+          User user = createUser(request);
+          return ApiResponse.success(userMapper.toDto(user));
+     }
+
      @Override
      @Transactional(readOnly = true)
      public User getUser(UUID id) {
@@ -51,14 +58,26 @@ public class UserServiceImpl implements UserService {
                   .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
      }
 
-     @Loggable
      @Override
-     @Transactional(readOnly = true)
-     public Page<User> getAllUsers(Pageable pageable) {
-          return userRepository.findAll(pageable);
+     public ApiResponse<UserDto> getUserWithResponse(UUID id) {
+          return ApiResponse.success(userMapper.toDto(getUser(id)));
      }
 
-     @Loggable
+     @Override
+     public Page<User> searchUsers(String name, Pageable pageable) {
+          if (name == null || name.isBlank()) {
+               return userRepository.findAll(pageable);
+          }else {
+               return userRepository.findByNameContainingIgnoreCase(name, pageable);
+          }
+     }
+
+     @Override
+     public ApiResponse<Page<UserDto>> searchUsersWithResponse(String name, Pageable pageable) {
+          Page<User> page = searchUsers(name, pageable);
+          return ApiResponse.success(page.map(userMapper::toDto));
+     }
+
      @Override
      public User updateUser(UUID id, UpdateUserRequest req) {
           User user = userRepository.findById(id)
@@ -69,20 +88,23 @@ public class UserServiceImpl implements UserService {
           return userRepository.save(user);
      }
 
-     @Loggable
      @Override
-     public void deleteUser(UUID id) {
+     public ApiResponse<UserDto> updateUserWithResponse(UUID id, UpdateUserRequest request) {
+          return ApiResponse.success(userMapper.toDto(updateUser(id, request)));
+     }
+
+     @Override
+     public User deleteUser(UUID id) {
           User user = userRepository.findById(id)
                   .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
           userRepository.delete(user);
+          applicationEventPublisher.publishEvent(new SendEmailRequest(UserOperation.DELETE, user.getEmail()));
+          return user;
      }
 
-     @Loggable
      @Override
-     @Transactional(readOnly = true)
-     public Page<User> searchUsersByName(String name, Pageable pageable) {
-          return userRepository.findByNameContainingIgnoreCase(name, pageable);
+     public ApiResponse<UserDto> deleteUserWithResponse(UUID id) {
+          return ApiResponse.success(userMapper.toDto(deleteUser(id)));
      }
 }
-
