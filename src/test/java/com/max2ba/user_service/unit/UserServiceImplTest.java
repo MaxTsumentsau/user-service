@@ -1,8 +1,7 @@
 package com.max2ba.user_service.unit;
 
-import com.max2ba.user_service.dto.CreateUserRequest;
+import com.max2ba.user_service.dto.UserRequest;
 import com.max2ba.user_service.dto.SendEmailRequest;
-import com.max2ba.user_service.dto.UpdateUserRequest;
 import com.max2ba.user_service.dto.UserOperation;
 import com.max2ba.user_service.entity.User;
 import com.max2ba.user_service.exception.NotFoundException;
@@ -44,14 +43,14 @@ class UserServiceImplTest {
      @Test
      void createUser() {
           SendEmailRequest sendEmailRequests = new SendEmailRequest(UserOperation.CREATE, "max@gmail.com");
-          when(userMapper.fromCreateRequest(any(CreateUserRequest.class)))
+          when(userMapper.fromCreateRequest(any(UserRequest.class)))
                   .thenReturn(new User(null, "Max", "max@gmail.com", 34, null));
 
           when(userRepository.save(any(User.class)))
                   .thenAnswer(invocation -> invocation.getArgument(0));
           doNothing().when(eventPublisher).publishEvent(sendEmailRequests);
 
-          var result = service.createUser(new CreateUserRequest("Max", "max@gmail.com", 34));
+          var result = service.createUser(new UserRequest("Max", "max@gmail.com", 34));
 
           verify(userMapper).fromCreateRequest(any());
           verify(userRepository).save(any(User.class));
@@ -128,7 +127,7 @@ class UserServiceImplTest {
                   "Max", "max@mail.com", 34, LocalDateTime.now()
           );
           UUID id = UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a");
-          UpdateUserRequest request = new UpdateUserRequest("Max", "max@mail.com", 34);
+          UserRequest request = new UserRequest("Max", "max@mail.com", 34);
 
           when(userRepository.findById(id))
                   .thenReturn(Optional.of(user));
@@ -150,7 +149,7 @@ class UserServiceImplTest {
 
           assertThrows(NotFoundException.class, () ->
                   service.updateUser(UUID.fromString("c0766553-4257-4e3c-957b-bbffdf51393a"),
-                          new UpdateUserRequest("Maxim", "maxim@mail.com", 34)));
+                          new UserRequest("Maxim", "maxim@mail.com", 34)));
           verify(userRepository, never()).save(any());
      }
 

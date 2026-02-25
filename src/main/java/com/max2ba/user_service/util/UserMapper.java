@@ -1,7 +1,6 @@
 package com.max2ba.user_service.util;
 
-import com.max2ba.user_service.dto.CreateUserRequest;
-import com.max2ba.user_service.dto.UpdateUserRequest;
+import com.max2ba.user_service.dto.UserRequest;
 import com.max2ba.user_service.dto.UserDto;
 import com.max2ba.user_service.entity.User;
 import org.mapstruct.Mapper;
@@ -13,10 +12,10 @@ public interface UserMapper {
 
      UserDto toDto(User user);
 
-     User fromCreateRequest(CreateUserRequest request);
+     User fromCreateRequest(UserRequest request);
 
      @Mapping(target = "id", ignore = true)
      @Mapping(target = "createdAt", ignore = true)
-     void updateUserFromRequest(UpdateUserRequest request, @MappingTarget User user);
+     void updateUserFromRequest(UserRequest request, @MappingTarget User user);
 }
 

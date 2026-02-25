@@ -1,6 +1,6 @@
 package com.max2ba.user_service.unit.event;
 
-import com.max2ba.user_service.dto.CreateUserRequest;
+import com.max2ba.user_service.dto.UserRequest;
 import com.max2ba.user_service.dto.SendEmailRequest;
 import com.max2ba.user_service.dto.UserOperation;
 import com.max2ba.user_service.entity.User;
@@ -37,7 +37,7 @@ public class UserServicePublishEventTest {
 
      @Test
      void createUser_shouldPublishEvent() {
-          CreateUserRequest request = new CreateUserRequest("Max", "max@gmail.com", 34);
+          UserRequest request = new UserRequest("Max", "max@gmail.com", 34);
           User user = new User(UUID.randomUUID(), request.name(), request.email(), request.age(), LocalDateTime.now());
           when(userMapper.fromCreateRequest(request)).thenReturn(user);
           when(userRepository.save(user)).thenReturn(user);
@@ -49,7 +49,7 @@ public class UserServicePublishEventTest {
 
      @Test
      void createUser_shouldNotPublishEvent() {
-          CreateUserRequest request = new CreateUserRequest("Max", "max@gmail.com", 34);
+          UserRequest request = new UserRequest("Max", "max@gmail.com", 34);
           User user = new User(null, request.name(), request.email(), request.age(), LocalDateTime.now());
           when(userMapper.fromCreateRequest(request)).thenReturn(user);
           when(userRepository.save(user)).thenThrow(ValidationException.class);

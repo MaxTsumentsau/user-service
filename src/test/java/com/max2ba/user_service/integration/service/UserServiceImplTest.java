@@ -1,7 +1,6 @@
 package com.max2ba.user_service.integration.service;
 
-import com.max2ba.user_service.dto.CreateUserRequest;
-import com.max2ba.user_service.dto.UpdateUserRequest;
+import com.max2ba.user_service.dto.UserRequest;
 import com.max2ba.user_service.entity.User;
 import com.max2ba.user_service.exception.NotFoundException;
 import com.max2ba.user_service.integration.IntegrationTestBase;
@@ -32,8 +31,8 @@ class UserServiceImplTest extends IntegrationTestBase {
 
      @Test
      void createUser_returnsSuccess() {
-          CreateUserRequest request =
-                  new CreateUserRequest("Golovach Lena", "LenaGolovach@gmail.com", 20);
+          UserRequest request =
+                  new UserRequest("Golovach Lena", "LenaGolovach@gmail.com", 20);
 
           User created = service.createUser(request);
 
@@ -48,10 +47,10 @@ class UserServiceImplTest extends IntegrationTestBase {
 
      @Test
      void createUser_duplicateEmail_throwsConstraintViolationException() {
-          service.createUser(new CreateUserRequest("Max", "max@mail.com", 30));
+          service.createUser(new UserRequest("Max", "max@mail.com", 30));
 
           assertThrows(ConstraintViolationException.class, () -> {
-                       service.createUser(new CreateUserRequest("Joe Parott", "max@mail.com", 23));
+                       service.createUser(new UserRequest("Joe Parott", "max@mail.com", 23));
                        entityManager.flush();
                   }
           );
@@ -88,7 +87,7 @@ class UserServiceImplTest extends IntegrationTestBase {
      void updateUser_success() {
           User saved = userRepository.save(
                   new User(null, "Head Ake", "headake@gmail.com", 34, LocalDateTime.now()));
-          UpdateUserRequest req = new UpdateUserRequest("CazzoCulo", "headake777@gmail.com", 45);
+          UserRequest req = new UserRequest("CazzoCulo", "headake777@gmail.com", 45);
 
           User updated = service.updateUser(saved.getId(), req);
 
@@ -108,7 +107,7 @@ class UserServiceImplTest extends IntegrationTestBase {
      void updateUser_returnsNotFound() {
           assertThrows(NotFoundException.class, () ->
                   service.updateUser(UUID.randomUUID(),
-                          new UpdateUserRequest("Eminem", "superman@gmail.com", 45))
+                          new UserRequest("Eminem", "superman@gmail.com", 45))
           );
      }
 
@@ -121,7 +120,7 @@ class UserServiceImplTest extends IntegrationTestBase {
 
           assertThrows(ConstraintViolationException.class, () -> {
                        service.updateUser(user2.getId(),
-                               new UpdateUserRequest("Pasha", user1.getEmail(), 30));
+                               new UserRequest("Pasha", user1.getEmail(), 30));
                        entityManager.flush();
                   }
           );
