@@ -14,12 +14,6 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      idle-timeout: 60000
-      max-lifetime: 1800000
-      connection-timeout: 30000
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -43,3 +37,12 @@ spring:
         max.in.flight.requests.per.connection: 1
       acks: all
       retries: 2147483647
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+    resolve-schema-properties: true
+  swagger-ui:
+    enabled: true
+    url: /openapi.yml

@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ public class UserServiceImpl implements UserService, UserFacade {
      private final ApplicationEventPublisher applicationEventPublisher;
 
      @Override
-     public User createUser(CreateUserRequest request) {
+     public User createUser(UserRequest request) {
           User user = userMapper.fromCreateRequest(request);
 
           try {
@@ -46,7 +47,7 @@ public class UserServiceImpl implements UserService, UserFacade {
      }
 
      @Override
-     public ApiResponse<UserDto> createUserWithResponse(CreateUserRequest request) {
+     public ApiResponse<UserDto> createUserWithResponse(UserRequest request) {
           User user = createUser(request);
           return ApiResponse.success(userMapper.toDto(user));
      }
@@ -73,13 +74,14 @@ public class UserServiceImpl implements UserService, UserFacade {
      }
 
      @Override
-     public ApiResponse<Page<UserDto>> searchUsersWithResponse(String name, Pageable pageable) {
+     public ApiResponse<Page<UserDto>> searchUsersWithResponse(String name, int pageNumber, int size) {
+          Pageable pageable = PageRequest.of(pageNumber, size);
           Page<User> page = searchUsers(name, pageable);
           return ApiResponse.success(page.map(userMapper::toDto));
      }
 
      @Override
-     public User updateUser(UUID id, UpdateUserRequest req) {
+     public User updateUser(UUID id, UserRequest req) {
           User user = userRepository.findById(id)
                   .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
 
@@ -89,7 +91,7 @@ public class UserServiceImpl implements UserService, UserFacade {
      }
 
      @Override
-     public ApiResponse<UserDto> updateUserWithResponse(UUID id, UpdateUserRequest request) {
+     public ApiResponse<UserDto> updateUserWithResponse(UUID id, UserRequest request) {
           return ApiResponse.success(userMapper.toDto(updateUser(id, request)));
      }
 

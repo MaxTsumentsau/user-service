@@ -1,0 +1,290 @@
+openapi: 3.0.1
+
+info:
+  title: User Service API
+  version: 1.0.0
+  description: >
+    API для управления пользователями. Поддерживает создание, обновление,
+    получение, поиск и удаление пользователей.
+
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+tags:
+  - name: Users
+    description: Операции с пользователями
+
+paths:
+
+  /users:
+    post:
+      summary: Создание пользователя
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserDto'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseString'
+
+  /users/{id}:
+    get:
+      summary: Получение пользователя по ID
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Пользователь найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserDto'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseString'
+
+    put:
+      summary: Обновление пользователя
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: Пользователь обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserDto'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseString'
+
+    delete:
+      summary: Удаление пользователя
+      tags: [Users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Пользователь удалён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserDto'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseString'
+
+  /users/search:
+    get:
+      summary: Поиск пользователей
+      tags: [Users]
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: Результаты поиска
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageUserDto'
+
+components:
+  schemas:
+
+    UserDto:
+      type: object
+      description: >
+        DTO, представляющий пользователя. Используется как основной объект данных,
+        возвращаемый сервисом. Не содержит аудиторских полей.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор пользователя
+          example: c1f1e3b2-8f3a-4c9e-9b1a-1a2b3c4d5e6f
+        name:
+          type: string
+          description: Имя пользователя
+          example: Maxim
+        email:
+          type: string
+          format: email
+          description: Имейл пользователя
+          example: max@gmail.com
+        age:
+          type: integer
+          description: Возраст пользователя
+          example: 25
+
+    UserRequest:
+      type: object
+      description: Запрос на создание или обновление пользователя.
+      properties:
+        name:
+          type: string
+          description: Имя пользователя
+          example: Maxim
+        email:
+          type: string
+          format: email
+          description: Email пользователя
+          example: maxim@gmail.com
+        age:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Возраст пользователя
+          example: 25
+      required: [name, email]
+
+    ResponseCode:
+      type: string
+      description: Перечисление кодов, описывающее возможные результаты выполнения API‑операций.
+      enum:
+        - SUCCESS
+        - VALIDATION_ERROR
+        - UNSUPPORTED_MEDIA_TYPE
+        - INTERNAL_ERROR
+        - UNEXPECTED_ERROR
+        - EMAIL_VALIDATION_ERROR
+        - DB_CONSTRAINT_ERROR
+        - DATA_CONSTRAINT_ERROR
+        - RESOURCE_NOT_FOUND
+        - INCORRECT_UUID_FORMAT
+        - ILLEGAL_ARGUMENT_ERROR
+        - USER_NOT_FOUND_ERROR
+
+    ApiResponse:
+      type: object
+      description: >
+        Универсальная обёртка для всех ответов API.
+      properties:
+        code:
+          $ref: '#/components/schemas/ResponseCode'
+        message:
+          type: string
+          example: Запрос успешно выполнен
+        data:
+          nullable: true
+
+    ApiResponseError:
+      type: object
+      description: >
+        Ответ API в случае ошибки.
+      properties:
+        code:
+          example: Код ошибки
+        message:
+          type: string
+          example: Название ошибки
+        data:
+          nullable: true
+
+    ApiResponseUserDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UserDto'
+
+    ApiResponseString:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseError'
+        - type: object
+          properties:
+            data:
+              type: string
+              example: Описание выброшенного исключения.
+
+    PageUserDto:
+      type: object
+      description: Пагинированный список пользователей
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDto'
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 5
+        totalElements:
+          type: integer
+          example: 42
+        totalPages:
+          type: integer
+          example: 9
+
+    ApiResponsePageUserDto:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PageUserDto'
+
