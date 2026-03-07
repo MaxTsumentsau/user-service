@@ -23,8 +23,7 @@ public class UserModelAssembler implements RepresentationModelAssembler<ApiRespo
                   response,
                   linkTo(methodOn(UserController.class).get(id)).withSelfRel(),
                   linkTo(methodOn(UserController.class).update(id, null)).withRel("update"),
-                  linkTo(methodOn(UserController.class).delete(id)).withRel("delete"),
-                  linkTo(methodOn(UserController.class).search(null, 0, 5)).withRel("search")
+                  linkTo(methodOn(UserController.class).delete(id)).withRel("delete")
           );
      }
 }
