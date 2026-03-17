@@ -1,48 +1,26 @@
-server:
-  port: 8080
 spring:
   application:
     name: user-service
-  web:
-    resources:
-      chain:
-        strategy:
-          content:
-            enabled: true
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
   config:
-    import: optional:application-secret.yml
-  kafka:
-    bootstrap-servers: localhost:19092,localhost:29092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        spring.json.add.type.headers: false
-        enable.idempotence: true
-        max.in.flight.requests.per.connection: 1
-      acks: all
-      retries: 2147483647
-
-springdoc:
-  api-docs:
-    enabled: true
-    path: /v3/api-docs
-    resolve-schema-properties: true
-  swagger-ui:
-    enabled: true
-    url: /openapi.yml
+    import:
+      - "optional:application-secret.yml"
+      - "optional:configserver:http://config-server:8888"
+  cloud:
+    bus:
+      enabled: true
+    config:
+      uri: http://config-server:8888
+      headers:
+        X-Config-Token: ${CONFIG_TOKEN}
+    stream:
+      defaultBinder: rabbit
+      bindings:
+          springCloudBusInput:
+            destination: springCloudBus
+          springCloudBusOutput:
+            destination: springCloudBus
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: ${RABBIT_USER}
+    password: ${RABBIT_PASSWORD}

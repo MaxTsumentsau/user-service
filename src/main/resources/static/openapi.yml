@@ -1,4 +1,5 @@
 openapi: 3.0.1
+x-swagger-ui-base-path: /api
 
 info:
   title: User Service API
@@ -17,7 +18,7 @@ tags:
 
 paths:
 
-  /users:
+  /api/users:
     post:
       summary: Создание пользователя
       tags: [Users]
@@ -41,7 +42,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiResponseString'
 
-  /users/{id}:
+  /api/users/{id}:
     get:
       summary: Получение пользователя по ID
       tags: [Users]
@@ -120,7 +121,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiResponseString'
 
-  /users/search:
+  /api/users/search:
     get:
       summary: Поиск пользователей
       tags: [Users]
@@ -287,4 +288,3 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/PageUserDto'
-
